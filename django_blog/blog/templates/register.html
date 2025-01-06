@@ -1,8 +1,16 @@
 HTML
 
-<h1>Register</h1>
+
+<!-- register.html -->
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Register</button>
 </form>
+<!-- register.html -->
+<head>
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+    <script src="{% static 'js/register.js' %}"></script>
+</body>
