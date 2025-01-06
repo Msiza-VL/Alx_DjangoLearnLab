@@ -1,35 +1,39 @@
+# accounts/serializers.py
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 
-User = get_user_model()
-
+# Serializer لتسجيل المستخدم
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    password2 = serializers.CharField(write_only=True, required=True)
-    password = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
-        fields = ('username', 'password', 'password2', 'email', 'first_name', 'last_name')
-
-    def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError({"password": "Password fields didn't match."})
-        return attrs
+        model = get_user_model()
+        fields = ['username', 'email', 'password']
 
     def create(self, validated_data):
-        user = Token.objects.create(
+        user = get_user_model().objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
+            password=validated_data['password']
         )
-        user.set_password(validated_data['password'])
-        get_user_model().objects.create_user
         return user
 
-class UserLoginSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    password = serializers.CharField(required=True)
+# Serializer لتسجيل الدخول واسترجاع التوكن
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = authenticate(username=data['username'], password=data['password'])
+        if user is None:
+            raise serializers.ValidationError('Invalid credentials')
+        return data
+
+    def create(self, validated_data):
+        user = authenticate(username=validated_data['username'], password=validated_data['password'])
+        token, created = Token.objects.create(user=user)
+        return {
+            'token': token.key
+        }

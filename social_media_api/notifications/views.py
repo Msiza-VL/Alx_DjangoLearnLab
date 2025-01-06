@@ -1,12 +1,18 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .models import Notification
-from .serializers import NotificationSerializer
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_notifications(request):
-    notifications = Notification.objects.filter(recipient=request.user).order_by('-timestamp')
-    serializer = NotificationSerializer(notifications, many=True)
-    return Response(serializer.data)
+class NotificationListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        notifications = Notification.objects.filter(recipient=request.user).order_by('-timestamp')
+        notification_data = [{
+            'actor': notification.actor.username,
+            'verb': notification.verb,
+            'timestamp': notification.timestamp,
+            'is_read': notification.is_read
+        } for notification in notifications]
+
+        return Response(notification_data)
