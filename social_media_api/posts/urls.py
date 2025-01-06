@@ -13,3 +13,10 @@ urlpatterns = [
     path('posts/<int:pk>/unlike/', views.UnlikePostView.as_view(), name='unlike-post'),
 
 ]
+rom django.urls import path
+from .views import FeedView
+
+urlpatterns = [
+    # ...
+    path('feed/', FeedView.as_view(), name='feed'),
+]
