@@ -1,15 +1,8 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<h1>My Profile</h1>
-
-<p>Username: {{ user.username }}</p>
-<p>Email: {{ user.email }}</p>
-
-{% if user.profile.bio %}
-    <p>Bio:</p>
-    <p>{{ user.profile.bio }}</p>
-{% endif %}
-
-<a href="{% url 'edit_profile' %}">Edit Profile</a>
-{% endblock content %}
+<!-- blog/templates/blog/profile.html -->
+<h2>Profile</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="email">Email:</label>
+    <input type="email" name="email" value="{{ user.email }}">
+    <button type="submit">Save</button>
+</form>
